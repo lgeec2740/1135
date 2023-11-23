@@ -1,6 +1,5 @@
 {
     "require": {
-        "noahbuscher/macaw": "dev-master",
         "tracy/tracy": "^2.10",
         "twig/twig": "^3.7",
         "jaqb/jaqb": "^1.6",

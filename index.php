@@ -2,7 +2,7 @@
 declare(strict_types=1);
 require_once 'vendor/autoload.php';
 
-use NoahBuscher\Macaw\Macaw;
+
 use Tracy\Debugger;
 use FastRoute\simpleDispatcher;
 use FastRoute\RouteCollector;
@@ -47,24 +47,6 @@ switch ($routeInfo[0]) {
         break;
 }
 
-Macaw::get('/', 'App\FrontEndController@articleList');
-Macaw::get('article/(:num)', 'App\FrontEndController@singleArticle');
-
-// admin
-
-Macaw::get('/admin', 'App\BackEndController@index');
-Macaw::get('/admin/login', 'App\BackEndController@login');
-Macaw::post('/admin/login', 'App\BackEndController@auth');
-Macaw::get('/admin/logout', 'App\BackEndController@logout');
-// articles CRUD
-Macaw::get('/admin/articles', 'App\BackEndController@articlesList');
-Macaw::get('/admin/article/create', 'App\BackEndController@showArticleCreateForm');
-Macaw::get('/admin/article/edit/(:num)', 'App\BackEndController@showArticleEditForm');
-Macaw::get('/admin/article/delete/(:num)', 'App\BackEndController@articleDelete');
-Macaw::post('/admin/article/update/', 'App\BackEndController@articleUpdate');
-Macaw::post('/admin/article/create', 'App\BackEndController@articleCreate');
-
-Macaw::dispatch();
 
 
 
