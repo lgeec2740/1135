@@ -11,10 +11,10 @@ class FrontEndController
     private \App\Model $model;
     private \App\View $view;
 
-    public function  __construct()
+    public function  __construct($model,$view)
     {
-        $this->model = new \App\Model();
-        $this->view = new \App\View();
+        $this->model = $model;
+        $this->view = $view;
     }
 
     /**
@@ -36,8 +36,6 @@ class FrontEndController
     public function singleArticle($id): void
     {
         $article = $this->model->getArticlesById((int)$id);
-        echo '<pre>';
-        var_dump($article);
         $this->view->showSingleArticle($article);
     }
 }

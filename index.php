@@ -1,52 +1,53 @@
 <?php
 declare(strict_types=1);
-require_once 'vendor/autoload.php';
+$container = require __DIR__ . '/src/bootstrap.php';
 
 
 use Tracy\Debugger;
-use FastRoute\simpleDispatcher;
 use FastRoute\RouteCollector;
 
 $whoops = new \Whoops\Run;
 $whoops->pushHandler(new \Whoops\Handler\PrettyPageHandler);
 $whoops->register();
 
-Debugger::enable();
 
 $dispatcher = FastRoute\simpleDispatcher(function(FastRoute\RouteCollector $r) {
-    $r->addRoute('GET', '/', 'App\FrontEndController@articleList');
-    // {id} must be a number (\d+)
-    $r->addRoute('GET', 'article/(:num)', 'App\FrontEndController@singleArticle');
-    // The /{title} suffix is optional
-    $r->addRoute('GET', '/admin/articles', 'App\BackEndController@articlesList');
+    $r->addRoute('GET', '/', ['App\FrontEndController','articleList']);
+    $r->addRoute('GET', '/article/{id}', ['App\FrontEndController','singleArticle']);
+
+    $r->addRoute('GET', '/admin/', ['App\BackEndController','index']);
+    $r->addRoute('POST', '/admin/login', ['App\BackEndController','login']);
+    $r->addRoute('GET', '/admin/login', ['App\BackEndController','auth']);
+    $r->addRoute('GET', '/admin/logout', ['App\BackEndController','logout']);
+
+    $r->addRoute('GET', '/admin/articles', ['App\BackEndController','articlesList']);
+    $r->addRoute('POST', '/admin/articles/create', ['App\BackEndController','showArticleCreateForm']);
+    $r->addRoute('GET', '/admin/articles/edit/{id}', ['App\BackEndController','showArticleEditForm']);
+    $r->addRoute('GET', '/admin/articles/delete/{id}', ['App\BackEndController','articleDelete']);
+    $r->addRoute('GET', '/admin/articles/update', ['App\BackEndController','articleUpdate']);
+    $r->addRoute('GET', '/admin/articles/create', ['App\BackEndController','articleCreate']);
 });
 
-// Fetch method and URI from somewhere
-$httpMethod = $_SERVER['REQUEST_METHOD'];
-$uri = $_SERVER['REQUEST_URI'];
+$route = $dispatcher->dispatch($_SERVER['REQUEST_METHOD'], $_SERVER['REQUEST_URI']);
 
-// Strip query string (?foo=bar) and decode URI
-if (false !== $pos = strpos($uri, '?')) {
-    $uri = substr($uri, 0, $pos);
-}
-$uri = rawurldecode($uri);
-
-$routeInfo = $dispatcher->dispatch($httpMethod, $uri);
-switch ($routeInfo[0]) {
+switch ($route[0]) {
     case FastRoute\Dispatcher::NOT_FOUND:
-        // ... 404 Not Found
+        echo '404 Not Found';
         break;
+
     case FastRoute\Dispatcher::METHOD_NOT_ALLOWED:
-        $allowedMethods = $routeInfo[1];
-        // ... 405 Method Not Allowed
+        echo '405 Method Not Allowed';
         break;
+
     case FastRoute\Dispatcher::FOUND:
-        $handler = $routeInfo[1];
-        $vars = $routeInfo[2];
-        // ... call $handler with $vars
+        $controller = $route[1];
+        $parameters = $route[2];
+
+        // We could do $container->get($controller) but $container->call()
+        // does that automatically
+        $container->call($controller, $parameters);
         break;
 }
-
 
 
 
