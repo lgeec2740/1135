@@ -157,10 +157,4 @@ class BackEndController
         }
         h::goUrl('/admin/articles');
     }
-
-    public function register(): void
-    {
-        echo $this->view->register();
-
-    }
 }

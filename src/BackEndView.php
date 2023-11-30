@@ -25,11 +25,6 @@ class BackEndView
         echo $this->twig->render('dashboard.twig');
     }
 
-    public function register(): void
-    {
-        echo $this->twig->render('register.twig');
-    }
-
     public function showLoginForm(): void
     {
         echo $this->twig->render('login.twig');
