@@ -1,18 +1,22 @@
 <?php
 declare(strict_types=1);
+
 namespace App;
+
 use Twig\Environment;
 use Twig\Error\LoaderError;
 use Twig\Error\RuntimeError;
 use Twig\Error\SyntaxError;
 use Twig\Loader\FilesystemLoader;
 
-class View{
-    public FilesystemLoader $loader;
+class View
+{
+
     public Environment $twig;
-    public function __construct(){
-        $this->loader = new FilesystemLoader('/');
-        $this->twig = new Environment($this->loader, []);
+
+    public function __construct(Environment $twig)
+    {
+        $this->twig = $twig;
     }
 
     /**
@@ -22,7 +26,7 @@ class View{
      */
     public function showArticleList($articles): void
     {
-        echo $this->twig->render('blog-list.twig', ['articles' =>$articles]);
+        echo $this->twig->render('blog-list.twig', ['articles' => $articles]);
     }
 
     /**
@@ -32,6 +36,6 @@ class View{
      */
     public function showSingleArticle($article): void
     {
-        echo $this->twig->render('blog-single.twig', ['article' =>$article]);
+        echo $this->twig->render('blog-single.twig', ['article' => $article]);
     }
 }

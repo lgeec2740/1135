@@ -4,75 +4,44 @@
 namespace App\Core;
 
 
+use Opis\Database\Database;
 use PDO;
 
 
 abstract class CoreModel implements ModelInterface
 {
+    protected  string $tableName;
+    private Database $db;
 
-
-    /**
-     * @var PDO
-     */
-    protected static PDO $dbh;
-
-    /**
-     * @var string
-     */
-    protected static string $tableName;
-
-    /**
-     * Model constructor.
-     */
-    public function __construct($tableName)
+    public function __construct(Database $db)
     {
-        self::$dbh = new PDO('mysql:host=localhost;dbname=1135-cms', 'dima05', 'Machtakov05');
-        self::$tableName = $tableName;
+        $this->db = $db;
     }
 
-    /**
-     * @param string $sql
-     * @param array $params
-     * @param bool $all
-     * @return mixed
-     */
-    public static function query(string $sql, array $params = [], bool $all = false): mixed
+    public  function setTableName(string $tableName): void
     {
-        // Подготовка запроса
-        $stmt = self::$dbh->prepare($sql);
-        // Выполняя запрос
-        $stmt->execute($params);
-        // Возвращаем ответ
-        if (!$all) {
-            return $stmt->fetchAll(\PDO::FETCH_ASSOC);
-        } else {
-            return $stmt->fetch(\PDO::FETCH_ASSOC);
-        }
+        $this->tableName = $tableName;
     }
 
-    /**
-     * @return mixed
-     */
-    public static function all(): mixed
+    public function all(): mixed
     {
-        // TODO: Implement all() method.
+        return $this->db->from($this->tableName)
+            ->select()
+            ->fetchAssoc()
+            ->all();
     }
 
-    /**
-     * @param int $id
-     * @return mixed
-     */
-    public static function find(int $id): mixed
+    public function find(int $id): mixed
     {
-        // TODO: Implement find() method.
+        return $this->db->from($this->tableName)
+            ->where('id')->is($id)
+            ->select()
+            ->fetchAssoc()
+            ->all();
     }
 
-    /**
-     * @return int
-     */
-    public static function count(): int
+    public function count(): int
     {
-        $sql = 'SELECT COUNT(*) as count from ' . self::$tableName;
-        return self::query($sql);
+        return  $this->db->from($this->tableName)->count();
     }
 }

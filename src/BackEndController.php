@@ -6,30 +6,33 @@ declare(strict_types=1);
 namespace App;
 
 use App\Helper as h;
+use App\Core\Auth;
 
 class BackEndController
 {
     private Model $model;
     private BackEndView $view;
+    use Auth;
 
     public function __construct()
     {
         $this->model = new Model();
         $this->view = new BackEndView();
-        if (!isset($_SESSION['user'])) {
+        if (!$this->checkAuth()) {
             $this->auth();
+            exit;
         }
     }
 
-    public function auth()
+    public function auth(): void
     {
         if (!isset($_POST['btnLogin'])) {
             $this->showLoginForm();
             exit;
         } else {
             if ($this->checkLogin($_POST['username'], $_POST['password'])) {
-                $_SESSION['user'] = 'admin';
-                //echo 'Вы залогинелись';
+                $this->signIn('admin', 1);
+                $this->setMessage('Привет $username');
             }
             h::goUrl('/admin');
         }
@@ -44,47 +47,62 @@ class BackEndController
         }
     }
 
-    public function index()
+    public function index(): void
     {
         $title = 'Список статей';
         $this->view->showIndex($title);
     }
 
-    public function showLoginForm()
+    public function showLoginForm(): void
     {
         $this->view->showLoginForm();
     }
 
-    public function logout()
+    public function logout(): void
     {
-        session_destroy();
+        $this->signOut();
         h::goUrl('/admin');
     }
 
-    public function articlesList()
+    public function setMessage(
+        $message,
+        $title = '',
+        $color = 'green',
+        $position = 'topRight'
+    ): void
+    {
+        $_SESSION['message'] = [
+            'color'    => $color,
+            'title'    => $title,
+            'message'  => $message,
+            'position' => $position,
+        ];
+    }
+
+    public function articlesList(): void
     {
         $title = 'Список статей';
         $articles = $this->model->getArticles();
         $this->view->showArticlesList($title, $articles);
     }
 
-    public function showArticleCreateForm()
+    public function showArticleCreateForm(): void
     {
         $title = 'Добавление статьи';
         $article = [];
-        $action = '/admin/article/create';
+        $action = '/admin/articles/create';
         $this->view->showArticleForm($title, $article, $action);
     }
 
-    public function showArticleEditForm($id)
+    public function showArticleEditForm($id): void
     {
         $title = 'Редактирование статьи';
-        $article = $this->model->getArticleById((int)$id);
-        $action = '/admin/article/update/';
+        $article = $this->model->getArticlesById((int)$id);
+        $action = '/admin/articles/update';
         $this->view->showArticleForm($title, $article, $action);
     }
 
-    public function articleDelete($id)
+    public function articleDelete($id): void
     {
         if ($this->model->articleDelete((int)$id)) {
             h::goUrl('/admin/articles');
@@ -94,7 +112,7 @@ class BackEndController
         h::goUrl('/admin/articles');
     }
 
-    public function articleCreate()
+    public function articleCreate(): void
     {
         $articleFields = $this->checkFields($_POST, $this->model->articleFields());
         $articles = $this->model->getArticles();
@@ -123,7 +141,7 @@ class BackEndController
         return $checkedFields;
     }
 
-    public function articleUpdate()
+    public function articleUpdate(): void
     {
         $articleItem = $this->checkFields($_POST, $this->model->articleFields());
         $articles = $this->model->getArticles();
@@ -138,5 +156,11 @@ class BackEndController
             //return true;
         }
         h::goUrl('/admin/articles');
+    }
+
+    public function register(): void
+    {
+        echo $this->view->register();
+
     }
 }

@@ -1,21 +1,41 @@
 <?php
 
+use App\BackEndController;
 use function DI\create;
+use function DI\get;
 use Twig\Environment;
 use Twig\Loader\FilesystemLoader;
+use \App\Model\ArticleModel;
+use \App\FrontEndController;
 
 return [
-    'connection'=>create(\Opis\Database\Connection::class)->constructor(
-        'mysql:host=localhost;dbname=1135-db',
-        'admin',
-        '123'
-    ),'Db'=>create(\Opis\Database\Database::class)->constructor(\DI\get('connection')),
-    'Loader'=>create(Twig\Loader::class)->constructor('./template/twig'),
-    'Twig'=>create(Environment::class)->constructor(\DI\get('Loader',[])),
-    'FrontView'=> create(\App\View::class)->constructor(\DI\get('Twig')),
-
-    \App\FrontEndController::class=>create(\App\FrontEndController::class)->constructor(\App\Model\ArticleModel::class),
-    (\DI\get('FrontView')),
-    \App\BackEndController::class=>create(\App\BackEndController::class)->constructor(\DI\get('FrontView')),
-    \App\BackEndView::class=>create(\App\BackEndView::class)->constructor(\DI\get('FrontView'))
+    'connection' => create(\Opis\Database\Connection::class)->constructor(
+        $_ENV['DB_DSN'],
+        $_ENV['DB_USERNAME'],
+        $_ENV['DB_PASSWORD']
+    ),
+    'Db' => create(\Opis\Database\Database::class)
+        ->constructor(
+            get('connection')
+        ),
+    ArticleModel::class => create(ArticleModel::class)
+        ->constructor(
+            get('Db')
+        ),
+    'FrontLoader' => create(FilesystemLoader::class)->constructor('./template/twig'),
+    'FrontTwig' => create(Environment::class)->constructor(get('FrontLoader', [])),
+    'FrontView' => create(\App\View::class)->constructor(get('FrontTwig')),
+    'BackLoader' => create(FilesystemLoader::class)->constructor('./template/backend'),
+    'BackTwig' => create(Environment::class)->constructor(get('BackLoader', [])),
+    'BackView' => create(\App\View::class)->constructor(get('BackTwig')),
+    FrontEndController::class => create(FrontEndController::class)
+        ->constructor(
+            get(ArticleModel::class),
+            get('FrontView')
+        ),
+    BackEndController::class => create(BackEndController::class)
+        ->constructor(
+            get(ArticleModel::class),
+            get('BackView')
+        ),
 ];

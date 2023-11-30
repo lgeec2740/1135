@@ -8,12 +8,12 @@ use Twig\Error\SyntaxError;
 
 class FrontEndController
 {
-    private \App\Model $model;
+    private Model\ArticleModel $articleModel;
     private \App\View $view;
 
-    public function  __construct($model,$view)
+    public function  __construct(Model\ArticleModel $articleModel,\App\View $view)
     {
-        $this->model = $model;
+        $this->articleModel = $articleModel;
         $this->view = $view;
     }
 
@@ -24,7 +24,7 @@ class FrontEndController
      */
     public function articleList(): void
     {
-        $articles = $this->model->getArticles();
+        $articles = $this->articleModel->all();
         $this->view->showArticleList($articles);
     }
 
@@ -35,7 +35,7 @@ class FrontEndController
      */
     public function singleArticle($id): void
     {
-        $article = $this->model->getArticlesById((int)$id);
+        $article = $this->articleModel->find((int)$id);
         $this->view->showSingleArticle($article);
     }
 }

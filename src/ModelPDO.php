@@ -21,14 +21,4 @@ class ModelPDO
         $this->pdo = new PDO($dsn, 'dima05', 'Machtakov05', $opt);
     }
 
-
-    public function all(): void
-    {
-        $stmt = $this->pdo->query('SELECT * FROM articles');
-        while ($row = $stmt->fetch())
-        {
-            $row['name'] . "\n";
-        }
-    }
-
 }
